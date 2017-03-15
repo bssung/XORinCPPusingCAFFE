@@ -1,0 +1,92 @@
+name: "XORmodel"
+layer {
+	name:	"train_inputdata"
+	type:	"MemoryData"
+	top:	"fulldata"
+	top:	"truelabel"
+	include	{
+		phase: TRAIN
+	}
+	memory_data_param {
+		batch_size:	64
+		channels:	1
+		height:		1
+		width:		2
+	}
+}
+
+layer {
+	name:	"test_inputdata"
+	type:	"MemoryData"
+	top:	"fulldata"
+	top:	"truelabel"
+	include {
+		phase: TEST
+	}
+	memory_data_param {
+		batch_size:	4
+		channels:	1
+		height:		1
+		width:		2
+	}
+}
+
+layer {
+	name:	"fullyConnected1"
+	type:	"InnerProduct"
+	bottom:	"fulldata"
+	top:	"fullyConnected1"
+	inner_product_param {
+		num_output:	2
+		weight_filler {
+			type:	"xavier"
+		}
+		bias_filler {
+			type:	"constant"
+		}
+	}
+}
+
+layer {
+	name:	"sigmoid1"
+	bottom:	"fullyConnected1"
+	top:	"sigmoid1"
+	type:	"Sigmoid"
+}
+
+layer {
+	name:	"fullyConnected2"
+	type:	"InnerProduct"
+	bottom:	"sigmoid1"
+	top:	"fullyConnected2"
+	inner_product_param {
+		num_output:	1
+		weight_filler {
+			type:	"xavier"
+		}
+		bias_filler {
+			type:	"constant"
+		}
+	}
+}
+
+layer {
+	name:	"output"
+	bottom:	"fullyConnected2"
+	top:	"output"
+	type:	"Sigmoid"
+	include {
+		phase: TEST
+	}
+}
+
+layer {
+	name:	"loss"
+	type:	"SigmoidCrossEntropyLoss"
+	bottom:	"fullyConnected2"
+	bottom:	"truelabel"
+	top: "loss"
+	include {
+		phase: TRAIN
+	}
+}
